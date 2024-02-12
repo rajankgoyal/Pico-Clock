@@ -37,15 +37,21 @@ def init():
 def main():
     init()
     temp, weather = api_caller.get_weather()
+    weather_reload = False
     ## Showing running time with blinking colon indicating seconds
     while True:
-        # Weather
-#         temp, weather = api_caller.get_weather()
-
         # Clears the OLED
         oled.fill(0)
-        timestamp=rtc.datetime()
+        oled_right.fill(0)
         # TIME
+        timestamp=rtc.datetime()
+        # Weather
+        if timestamp[5]%15==0 and weather_reload is True:
+            temp, weather = api_caller.get_weather()
+            weather_reload = False
+        if (timestamp[5]-1)%15==0:
+            weather_reload = True
+
         digit_1 = int(timestamp[4]/10)
         digit_2 = timestamp[4]%10
         digit_3 = int(timestamp[5]/10)
@@ -64,21 +70,23 @@ def main():
         # DIVIDING LINE
         oled_right.vline(63, 25, 35, 2)
         # INSIDE TEMPERATURE
-        print(temp)
         write20_right.text(weather, 0, 30, 1)
         oled_right.blit(bit_numbers(int(temp/10)), 64, 19) # show the image at location (x=0,y=0)
         oled_right.blit(bit_numbers(temp%10), 94, 19) # show the image at location (x=0,y=0)
-        if timestamp[5]%5==0 and timestamp[6] == 0:
-            print('Weather will work just fine')
-        print(timestamp[5])
-        print(timestamp[6])
-        print('----------')
+#         if timestamp[5]%5==0 and timestamp[6] == 0:
+#             print('Weather will work just fine')
+#         print(timestamp[5])
+#         print(timestamp[6])
+#         print('----------')
         for second in range(2):
             oled.fill_rect(60, 30, 5, 5, second)
             oled.fill_rect(60, 50, 5, 5, second)
-            oled.show()
-            oled_right.show()
-            utime.sleep(0.5)
+            try:
+                oled.show()
+                oled_right.show()
+            except:
+                continue
+            utime.sleep(1)
             
             
 if __name__ == "__main__":
