@@ -8,7 +8,7 @@ import framebuf, sys, utime, imgfile,wlan,api_caller
 # CONSTANTS
 DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN']
 MONTHS = ['ZERO_MONTH','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
-
+STOCKS = ['PLTR','IVV','SPCE','AMZN']
 # OLED
 i2c_dev = I2C(1,scl=Pin(27),sda=Pin(26),freq=200000)  # start I2C on I2C1 (GPIO 26/27)
 oled = SSD1306_I2C(128, 64, i2c_dev) # oled controller
@@ -23,7 +23,7 @@ digit_1,digit_2,digit_3,digit_4 = 0,0,0,0
 #big fonts
 write20 = Write(oled, ubuntu_mono_20)
 write20_right = Write(oled_right, ubuntu_mono_20)
-
+write15_right = Write(oled_right, ubuntu_mono_15)
 
 def bit_numbers(number):
     buffer,img_res = imgfile.get_img(number) # get the image byte array
@@ -36,8 +36,11 @@ def init():
 
 def main():
     init()
-    temp, weather = api_caller.get_weather()
+    temp, low_temp, high_temp, weather = api_caller.get_weather()
+    stock_name, stock_price = api_caller.get_stock(STOCKS[0])
     weather_reload = False
+    stock_reload = False
+    stock_count = 1
     ## Showing running time with blinking colon indicating seconds
     while True:
         # Clears the OLED
@@ -47,10 +50,19 @@ def main():
         timestamp=rtc.datetime()
         # Weather
         if timestamp[5]%15==0 and weather_reload is True:
-            temp, weather = api_caller.get_weather()
+            temp, low_temp, high_temp, weather = api_caller.get_weather()
             weather_reload = False
         if (timestamp[5]-1)%15==0:
             weather_reload = True
+        # Stocks
+        if timestamp[6]%15==0 and stock_reload is True:
+            stock_name, stock_price = api_caller.get_stock(STOCKS[stock_count])
+            stock_count+=1
+            stock_reload = False
+        if (timestamp[6]-1)%15==0:
+            if len(STOCKS) <= stock_count:
+                stock_count=0
+            stock_reload = True
 
         digit_1 = int(timestamp[4]/10)
         digit_2 = timestamp[4]%10
@@ -65,12 +77,13 @@ def main():
         write20.text(str("%02d"%(timestamp[2])), 105, 0, 1)
         write20.text(DAYS[timestamp[3]], 0, 0, 1)
         #STOCKS
-        write20_right.text("PLTR", 0, 0, 1)
-        write20_right.text('47.45', 75, 0, 1)
+        write20_right.text(stock_name, 0, 0, 1)
+        write20_right.text(stock_price, 67, 0, 1)
         # DIVIDING LINE
         oled_right.vline(63, 25, 35, 2)
         # INSIDE TEMPERATURE
-        write20_right.text(weather, 0, 30, 1)
+        write20_right.text(weather, 0, 20, 1)
+        write20_right.text(f"{low_temp}-{high_temp}", 0, 42, 1)
         oled_right.blit(bit_numbers(int(temp/10)), 64, 19) # show the image at location (x=0,y=0)
         oled_right.blit(bit_numbers(temp%10), 94, 19) # show the image at location (x=0,y=0)
 #         if timestamp[5]%5==0 and timestamp[6] == 0:
@@ -78,16 +91,24 @@ def main():
 #         print(timestamp[5])
 #         print(timestamp[6])
 #         print('----------')
-        for second in range(2):
-            oled.fill_rect(60, 30, 5, 5, second)
-            oled.fill_rect(60, 50, 5, 5, second)
-            try:
-                oled.show()
-                oled_right.show()
-            except:
-                continue
-            utime.sleep(1)
-            
+#         for second in range(2):
+#             oled.fill_rect(60, 30, 5, 5, second)
+#             oled.fill_rect(60, 50, 5, 5, second)
+#             try:
+#                 oled.show()
+#                 oled_right.show()
+#             except:
+#                 continue
+#             utime.sleep(1)
+        oled.fill_rect(60, 30, 5, 5, (timestamp[6]%2))
+        oled.fill_rect(60, 50, 5, 5, (timestamp[6]%2))
+        try:
+            oled.show()
+            oled_right.show()
+        except:
+            print('FAILED OLED')
+            continue
             
 if __name__ == "__main__":
     main()
+

@@ -26,6 +26,17 @@ def get_weather():
 
     data = response.json()
     print('Weather API was called')
-    return(int(data['main']['temp']), data['weather'][0]['main'])
+    return(int(data['main']['temp']), int(data['main']['temp_min']), int(data['main']['temp_max']), data['weather'][0]['main'])
 
-
+def get_stock(ticker):
+    # Make an API call
+    try:
+        response = urequests.get(f'https://finnhub.io/api/v1/quote?symbol={ticker}&token=cn3evr1r01qtdiesh270cn3evr1r01qtdiesh27g')
+    except Exception as e:
+        print('failed to get stock info')
+    data = response.json()
+    print('Stock API was called')
+    return(ticker,str( "%0.2f" % data['c']))
+        
+        
+        
