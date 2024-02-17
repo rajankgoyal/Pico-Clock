@@ -10,9 +10,9 @@ DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN']
 MONTHS = ['ZERO_MONTH','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
 STOCKS = ['PLTR','IVV','SPCE','AMZN']
 # OLED
-i2c_dev = I2C(1,scl=Pin(27),sda=Pin(26),freq=200000)  # start I2C on I2C1 (GPIO 26/27)
+i2c_dev = I2C(1,scl=Pin(27),sda=Pin(26))  # start I2C on I2C1 (GPIO 26/27)
 oled = SSD1306_I2C(128, 64, i2c_dev) # oled controller
-i2c_right = I2C(0,scl=Pin(21),sda=Pin(20),freq=200000)
+i2c_right = I2C(0,scl=Pin(21),sda=Pin(20))
 oled_right = SSD1306_I2C(128, 64, i2c_right)
 
 # TIME
@@ -63,15 +63,16 @@ def main():
             if len(STOCKS) <= stock_count:
                 stock_count=0
             stock_reload = True
-
-        digit_1 = int(timestamp[4]/10)
-        digit_2 = timestamp[4]%10
-        digit_3 = int(timestamp[5]/10)
-        digit_4 = timestamp[5]%10
-        oled.blit(bit_numbers(digit_1), -5, 19) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(digit_2), 25, 19) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(digit_3), 64, 19) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(digit_4), 94, 19) # show the image at location (x=0,y=0)
+            
+        # 12h Clock
+        hour = timestamp[4]
+        if hour > 12:
+            hour -=12
+    
+        oled.blit(bit_numbers(int(hour/10)), -5, 19, (1 if hour<10 else 0)) # show the image at location (x=0,y=0)
+        oled.blit(bit_numbers(hour%10), 25, 19) # show the image at location (x=0,y=0)
+        oled.blit(bit_numbers(int(timestamp[5]/10)), 64, 19) # show the image at location (x=0,y=0)
+        oled.blit(bit_numbers(timestamp[5]%10), 94, 19) # show the image at location (x=0,y=0)
         # CALENDER
         write20.text(MONTHS[timestamp[1]], 50, 0, 1)
         write20.text(str("%02d"%(timestamp[2])), 105, 0, 1)
@@ -105,7 +106,8 @@ def main():
         try:
             oled.show()
             oled_right.show()
-        except:
+        except x:
+            print(x)
             print('FAILED OLED')
             continue
             
