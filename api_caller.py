@@ -36,7 +36,7 @@ def get_stock(ticker):
         print('failed to get stock info')
     data = response.json()
     print('Stock API was called')
-    return(ticker,str( "%0.2f" % data['c']))
+    return(ticker,str( "%8.2f" % data['c']))
         
         
         

@@ -41,69 +41,59 @@ def main():
     weather_reload = False
     stock_reload = False
     stock_count = 1
-    ## Showing running time with blinking colon indicating seconds
     while True:
-        # Clears the OLED
-        oled.fill(0)
-        oled_right.fill(0)
-        # TIME
-        timestamp=rtc.datetime()
-        # Weather
-        if timestamp[5]%15==0 and weather_reload is True:
-            temp, low_temp, high_temp, weather = api_caller.get_weather()
-            weather_reload = False
-        if (timestamp[5]-1)%15==0:
-            weather_reload = True
-        # Stocks
-        if timestamp[6]%15==0 and stock_reload is True:
-            stock_name, stock_price = api_caller.get_stock(STOCKS[stock_count])
-            stock_count+=1
-            stock_reload = False
-        if (timestamp[6]-1)%15==0:
-            if len(STOCKS) <= stock_count:
-                stock_count=0
-            stock_reload = True
-            
-        # 12h Clock
-        hour = timestamp[4]
-        if hour > 12:
-            hour -=12
-    
-        oled.blit(bit_numbers(int(hour/10)), -5, 19, (1 if hour<10 else 0)) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(hour%10), 25, 19) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(int(timestamp[5]/10)), 64, 19) # show the image at location (x=0,y=0)
-        oled.blit(bit_numbers(timestamp[5]%10), 94, 19) # show the image at location (x=0,y=0)
-        # CALENDER
-        write20.text(MONTHS[timestamp[1]], 50, 0, 1)
-        write20.text(str("%02d"%(timestamp[2])), 105, 0, 1)
-        write20.text(DAYS[timestamp[3]], 0, 0, 1)
-        #STOCKS
-        write20_right.text(stock_name, 0, 0, 1)
-        write20_right.text(stock_price, 67, 0, 1)
-        # DIVIDING LINE
-        oled_right.vline(63, 25, 35, 2)
-        # INSIDE TEMPERATURE
-        write20_right.text(weather, 0, 20, 1)
-        write20_right.text(f"{low_temp}-{high_temp}", 0, 42, 1)
-        oled_right.blit(bit_numbers(int(temp/10)), 64, 19) # show the image at location (x=0,y=0)
-        oled_right.blit(bit_numbers(temp%10), 94, 19) # show the image at location (x=0,y=0)
-#         if timestamp[5]%5==0 and timestamp[6] == 0:
-#             print('Weather will work just fine')
-#         print(timestamp[5])
-#         print(timestamp[6])
-#         print('----------')
-#         for second in range(2):
-#             oled.fill_rect(60, 30, 5, 5, second)
-#             oled.fill_rect(60, 50, 5, 5, second)
-#             try:
-#                 oled.show()
-#                 oled_right.show()
-#             except:
-#                 continue
-#             utime.sleep(1)
-        oled.fill_rect(60, 30, 5, 5, (timestamp[6]%2))
-        oled.fill_rect(60, 50, 5, 5, (timestamp[6]%2))
+        ## Showing running time with blinking colon indicating seconds
         try:
+            # Clears the OLED
+            oled.fill(0)
+            oled_right.fill(0)
+            # TIME
+            timestamp=rtc.datetime()
+            # Weather
+            if timestamp[5]%15==0 and weather_reload is True:
+                temp, low_temp, high_temp, weather = api_caller.get_weather()
+                weather_reload = False
+            if (timestamp[5]-1)%15==0:
+                weather_reload = True
+            # Stocks
+            if timestamp[6]%15==0 and stock_reload is True:
+                stock_name, stock_price = api_caller.get_stock(STOCKS[stock_count])
+                print(timestamp)
+                stock_count+=1
+                stock_reload = False
+            if (timestamp[6]-1)%15==0:
+                if len(STOCKS) <= stock_count:
+                    stock_count=0
+                stock_reload = True
+                
+            # 12h Clock
+            hour = timestamp[4]
+            if hour > 12:
+                hour -=12
+        
+            oled.blit(bit_numbers(int(hour/10)), -5, 19, (1 if hour<10 else 0)) # show the image at location (x=0,y=0)
+            oled.blit(bit_numbers(hour%10), 25, 19) # show the image at location (x=0,y=0)
+            oled.blit(bit_numbers(int(timestamp[5]/10)), 64, 19) # show the image at location (x=0,y=0)
+            oled.blit(bit_numbers(timestamp[5]%10), 94, 19) # show the image at location (x=0,y=0)
+            # CALENDER
+            write20.text(DAYS[timestamp[3]], 0, 0, 1)
+            write20.text(MONTHS[timestamp[1]], 50, 0, 1)
+            write20.text(str("%02d"%(timestamp[2])), 105, 0, 1)
+
+            #STOCKS
+            write20_right.text(stock_name, 0, 0, 1)
+            write20_right.text(stock_price, 49, 0, 1)
+            # DIVIDING LINE
+            oled_right.vline(63, 25, 35, 2)
+            # INSIDE TEMPERATURE
+            write20_right.text(weather, 0, 20, 1)
+            write20_right.text(f"{low_temp}-{high_temp}", 0, 42, 1)
+            oled_right.blit(bit_numbers(int(temp/10)), 64, 19) # show the image at location (x=0,y=0)
+            oled_right.blit(bit_numbers(temp%10), 94, 19) # show the image at location (x=0,y=0)
+            # SECOND indicator, flashes every second
+            oled.fill_rect(60, 30, 5, 5, (timestamp[6]%2))
+            oled.fill_rect(60, 50, 5, 5, (timestamp[6]%2))
+            
             oled.show()
             oled_right.show()
         except x:
