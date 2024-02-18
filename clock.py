@@ -1,8 +1,8 @@
 from machine import Pin, I2C, RTC
 from oled import Write, GFX, SSD1306_I2C
-from oled.fonts import ubuntu_mono_15, ubuntu_mono_20, bookerly_20
+from fonts import ubuntu_mono_15, ubuntu_mono_20
 from ssd1306 import SSD1306_I2C
-import framebuf, sys, utime, imgfile,wlan,api_caller
+import framebuf, sys, utime, imgfile,wlan,api_caller,clock_config
 
 
 # CONSTANTS
@@ -30,10 +30,19 @@ def bit_numbers(number):
     fb = framebuf.FrameBuffer(buffer, img_res[0], img_res[1], framebuf.MONO_HMSB) # MONO_HLSB, MONO_VLSB, MONO_HMSB
     return fb
 def init():
-    wlan.connect_WLAN('NWRKTEST', 'FASTCARS1')
-    rtc.datetime(api_caller.get_time())
-    
-
+    try:
+        print('trying')
+        f = open('raw.txt', 'r')
+        wifi_name = f.readline().strip()
+        wifi_pass = f.readline().strip()
+        weather_c = f.readline().strip()
+        stock_tic = f.readline().split(' ')
+        print(f'Got file{wifi_name}, {wifi_pass}, {weather_c}')
+        wlan.connect_WLAN(wifi_name, wifi_pass)
+        rtc.datetime(api_caller.get_time())
+    except:
+        print('Failed to get config file')
+        clock_config.get_init()
 def main():
     init()
     temp, low_temp, high_temp, weather = api_caller.get_weather()
@@ -70,7 +79,7 @@ def main():
             hour = timestamp[4]
             if hour > 12:
                 hour -=12
-        
+
             oled.blit(bit_numbers(int(hour/10)), -5, 19, (1 if hour<10 else 0)) # show the image at location (x=0,y=0)
             oled.blit(bit_numbers(hour%10), 25, 19) # show the image at location (x=0,y=0)
             oled.blit(bit_numbers(int(timestamp[5]/10)), 64, 19) # show the image at location (x=0,y=0)
@@ -96,13 +105,13 @@ def main():
             
             oled.show()
             oled_right.show()
-        except x:
-            print(x)
+        except:
             print('FAILED OLED')
             continue
             
 if __name__ == "__main__":
     main()
+
 
 
 
