@@ -42,44 +42,43 @@ def get_init():
     print('Listening on', addr)
 
     # Listen for connections
-    while True:
-        try:
-            #Getting Connetion setup
-            conn, addr = s.accept()
-            print('Got a connection from %s' % str(addr))
-            request = conn.recv(1024)
-            request = str(request)
-            # Getting part of Wifiname from the form
-            index = request.find('text=')+5
-            index1 = request.find('&text1=')
-            # checking the length of returned data Wifi name
-            if(len(request[index:index1])<64):
-                
-                wifi_name = request[index:index1]
-                # Getting Wifi password
-                index = request.find('text1=')+6
-                index1 = request.find('&text2=')
-                wifi_pass = request[index:index1]
-                # Getting Weather City
-                index = request.find('text2=')+6
-                index1 = request.find('&textarea=')
-                weather_city = request[index:index1]
-                # Getting Stock tickers
-                index = request.find('&textarea=')+10
-                index1 = request.find('&submit=')
-                stocks = request[index:index1]
-                # Separating out the stock tickers
-                stock_tickers = ' '.join(stocks.split('%2C'))
-                # writing to the file
-                write_raw(f'{wifi_name}\n{wifi_pass}\n{weather_city}\n{stock_tickers}')
-                
-            # Load html and replace with current data 
-            response = get_html('clock.html')
+    try:
+        #Getting Connetion setup
+        conn, addr = s.accept()
+        print('Got a connection from %s' % str(addr))
+        request = conn.recv(1024)
+        request = str(request)
+        # Getting part of Wifiname from the form
+        index = request.find('text=')+5
+        index1 = request.find('&text1=')
+        # checking the length of returned data Wifi name
+        if(len(request[index:index1])<64):
+            
+            wifi_name = request[index:index1]
+            # Getting Wifi password
+            index = request.find('text1=')+6
+            index1 = request.find('&text2=')
+            wifi_pass = request[index:index1]
+            # Getting Weather City
+            index = request.find('text2=')+6
+            index1 = request.find('&textarea=')
+            weather_city = request[index:index1]
+            # Getting Stock tickers
+            index = request.find('&textarea=')+10
+            index1 = request.find('&submit=')
+            stocks = request[index:index1]
+            # Separating out the stock tickers
+            stock_tickers = ' '.join(stocks.split('%2C'))
+            # writing to the file
+            write_raw(f'{wifi_name}\n{wifi_pass}\n{weather_city}\n{stock_tickers}')
+            
+        # Load html and replace with current data 
+        response = get_html('clock.html')
 
-            conn.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-            conn.send(response)
-            conn.close()
-        except OSError as e:
-            conn.close()
-            print('Connection closed')
+        conn.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+        conn.send(response)
+        conn.close()
+    except OSError as e:
+        conn.close()
+        print('Connection closed')
 
