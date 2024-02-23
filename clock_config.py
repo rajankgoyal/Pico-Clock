@@ -16,11 +16,14 @@ def write_raw(raw):
     
 # Function to read config data
 def read_raw():
-    f = open('raw.txt', 'r')
+    f = open('raw.txt', 'r', encoding='utf-8-sig')
     print(f.read())
 def get_init():
     ssid = 'PICOCLOCK'
     password = 'picoclock'
+    wifi_name = ''
+    wifi_pass = ''
+    weather_city = ''
 
     ap = network.WLAN(network.AP_IF)
     ap.config(essid=ssid, password=password)
@@ -43,6 +46,7 @@ def get_init():
 
     # Listen for connections
     while True:
+
         try:
             #Getting Connetion setup
             conn, addr = s.accept()
@@ -75,7 +79,22 @@ def get_init():
                 
             # Load html and replace with current data 
             response = get_html('clock.html')
-
+            try:
+                f = open('raw.txt', 'r', encoding='utf-8-sig')
+                wifi_name_f = f.readline().strip()
+                wifi_pass_f = f.readline().strip()
+                weather_city_f = f.readline().strip()
+                stock_tickers_f = f.readline().strip()
+                response = response.replace('wifiname_value', str(wifi_name_f))
+                response = response.replace('wifipass_value', str(wifi_pass_f))
+                response = response.replace('weather_value', str(','.join(weather_city_f.split('%2C'))))
+                response = response.replace('stock_value', str(','.join(stock_tickers_f.split(' '))))
+                print(wifi_name_f)
+                
+            except Exception as e:
+                print (e)
+                response = response.replace('slider_value', '0')
+                print('error showing wifi name')
             conn.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
             conn.send(response)
             conn.close()
@@ -83,3 +102,4 @@ def get_init():
             conn.close()
             print('Connection closed')
 
+get_init()
