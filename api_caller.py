@@ -19,10 +19,10 @@ def get_time():
 
 
 
-def get_weather():
+def get_weather(weather_location):
     # Make an API call
     try:
-        response = urequests.get(url='https://api.openweathermap.org/data/2.5/weather?q=Leesburg,us&APPID=8962d5f34baf517175534828154b554f&units=imperial')
+        response = urequests.get(url=f'https://api.openweathermap.org/data/2.5/weather?q={weather_location}&APPID=8962d5f34baf517175534828154b554f&units=imperial')
         data = response.json()
         print('Weather API was called')
         return(int(data['main']['temp']), int(data['main']['temp_min']), int(data['main']['temp_max']), data['weather'][0]['main'])
@@ -44,3 +44,4 @@ def get_stock(ticker):
         
         
         
+
