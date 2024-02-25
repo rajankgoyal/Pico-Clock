@@ -6,7 +6,9 @@ def connect_WLAN(NAME, PASSWORD):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(NAME, PASSWORD)
+    print (f'Connecting to {NAME}')
     while not wlan.isconnected():
         pass
-    return('Connected to WLAN')
+    print(f'Connected to WLAN {NAME}')
+
 
