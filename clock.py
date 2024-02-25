@@ -94,7 +94,9 @@ def main():
             # 12h Clock
             hour = timestamp[4]
             if hour > 12:
-                hour -=12
+                hour -= 12
+            if hour == 0:
+                hour = 12
                 
             # TIME
             oled.blit(bit_numbers(int(hour/10)), -5, 19, (1 if hour<10 else 0)) # show the image at location (x=0,y=0)
