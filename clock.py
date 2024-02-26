@@ -41,6 +41,10 @@ def init():
         wifi_pass = f.readline().strip()
         weather_location = f.readline().strip()
         stock_tickers = f.readline().split(' ')
+        stock_data = {}
+        for key in keys:
+            key, value = api_caller.get_stock(key)
+            data_dict[key] = value
         #print(f'Got file {wifi_name}, {wifi_pass}, {weather_location}, {stock_tickers}')
         wlan.connect_WLAN(wifi_name, wifi_pass)
         oled.text('Connected to WIFI', 0, 25, 1)
@@ -48,7 +52,7 @@ def init():
         rtc.datetime(api_caller.get_time())
         oled.text('Called Time API', 0, 35, 1)
         oled.show()
-        return(weather_location, stock_tickers)
+        return(weather_location, stock_tickers, stock_data)
     except Exception as error:
         print("An exception occurred:", error)
         print('Failed to get config file')
@@ -59,7 +63,7 @@ def main():
     stock_reload = False
     stock_count = 0
 
-    weather_location, stock_tickers = init()
+    weather_location, stock_tickers, stock_data = init()
     temp, low_temp, high_temp, weather = api_caller.get_weather(weather_location)
     oled.text('Called Weather API', 0, 45, 1)
     stock_name, stock_price = api_caller.get_stock(stock_tickers[stock_count])
