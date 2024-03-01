@@ -41,10 +41,6 @@ def init():
         wifi_pass = f.readline().strip()
         weather_location = f.readline().strip()
         stock_tickers = f.readline().split(' ')
-        stock_data = {}
-        for key in keys:
-            key, value = api_caller.get_stock(key)
-            data_dict[key] = value
         #print(f'Got file {wifi_name}, {wifi_pass}, {weather_location}, {stock_tickers}')
         wlan.connect_WLAN(wifi_name, wifi_pass)
         oled.text('Connected to WIFI', 0, 25, 1)
@@ -52,7 +48,7 @@ def init():
         rtc.datetime(api_caller.get_time())
         oled.text('Called Time API', 0, 35, 1)
         oled.show()
-        return(weather_location, stock_tickers, stock_data)
+        return(weather_location, stock_tickers)
     except Exception as error:
         print("An exception occurred:", error)
         print('Failed to get config file')
@@ -63,11 +59,13 @@ def main():
     stock_reload = False
     stock_count = 0
 
-    weather_location, stock_tickers, stock_data = init()
+    weather_location, stock_tickers = init()
     temp, low_temp, high_temp, weather = api_caller.get_weather(weather_location)
     oled.text('Called Weather API', 0, 45, 1)
-    stock_name, stock_price = api_caller.get_stock(stock_tickers[stock_count])
+    oled.show()
+    stock_name, stock_price, percent_change = api_caller.get_stock(stock_tickers[stock_count])
     oled.text('Called Stock API', 0, 55, 1)
+    oled.show()
     utime.sleep(1)
     while True:
         try:
@@ -87,7 +85,7 @@ def main():
                 
             # Stocks
             if timestamp[6]==0 and stock_reload is True:
-                stock_name, stock_price = api_caller.get_stock(stock_tickers[stock_count])
+                stock_name, stock_price, percent_change = api_caller.get_stock(stock_tickers[stock_count])
                 stock_count+=1
                 stock_reload = False
             if (timestamp[6])==5:
@@ -115,7 +113,10 @@ def main():
 
             # STOCKS
             write20_right.text(stock_name, 0, 0, 1)
-            write20_right.text(stock_price, 49, 0, 1)
+            if timestamp[6] % 10 < 5: 
+                write20_right.text(stock_price, 49, 0, 1)
+            else:
+                write20_right.text(percent_change, 65, 0, 1)
             
             # DIVIDING LINE
             oled_right.vline(63, 25, 35, 2)
