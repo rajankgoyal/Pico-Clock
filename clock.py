@@ -122,7 +122,10 @@ def main():
             oled_right.vline(63, 25, 35, 2)
             
             # INSIDE TEMPERATURE
-            write20_right.text(weather, 0, 20, 1)
+            if len(weather) < 7:
+                write20_right.text(weather, 0, 20, 1)
+            else:
+                write15_right.text(weather, 0, 25, 1)
             write20_right.text(f"{low_temp}-{high_temp}", 0, 42, 1)
             oled_right.blit(bit_numbers(int(temp/10)), 64, 19) # show the image at location (x=0,y=0)
             oled_right.blit(bit_numbers(temp%10), 94, 19) # show the image at location (x=0,y=0)
