@@ -2,7 +2,7 @@ import urequests
 def get_time():
     # Make an API call
     try:
-        response = urequests.get(url='https://worldtimeapi.org/api/timezone/est')
+        response = urequests.get(url='http://worldtimeapi.org/api/timezone/America/New_York')
         data = response.json()
         datetime=data['datetime']
         day_of_week= data['day_of_week']
